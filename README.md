@@ -1,6 +1,8 @@
-# hci2
-
-
+# HCI2
+#### Project Description
+-
+#### API Used
+-
 #### To get project started
 - Run ``` pip install --upgrade pip ```
 - [Optional step] create a virtual enviornment ``` virtualenv venv ``` and load it into workspace.
