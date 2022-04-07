@@ -2,7 +2,7 @@
 #### Project Description
 -
 #### API Used
--
+- https://rapidapi.com/Chewett/api/pokemon-go1/details
 #### To get project started
 - Run ``` pip install --upgrade pip ```
 - [Optional step] create a virtual enviornment ``` virtualenv venv ``` and load it into workspace.
