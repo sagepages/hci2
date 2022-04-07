@@ -1,4 +1,5 @@
 from typing import OrderedDict
+from decouple import config
 import altair as alt
 import streamlit as st
 import requests as req
@@ -11,7 +12,7 @@ st.title("PokemonGo Helper")
 pokemon_names_url = "https://pokemon-go1.p.rapidapi.com/pokemon_names.json"
 pokemon_stats_url = "https://pokemon-go1.p.rapidapi.com/pokemon_stats.json"
 pokemon_types_url = "https://pokemon-go1.p.rapidapi.com/pokemon_types.json"
-headers = {"X-RapidAPI-Key": "ae0e632900mshc5de424261ceb4bp1b1117jsn6b67e354b629"}
+headers = {"X-RapidAPI-Key": config("API_KEY")}
 
 # Requests
 pokemon_names_response = req.request("GET", pokemon_names_url, headers=headers)
