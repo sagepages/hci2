@@ -1,7 +1,7 @@
 from typing import OrderedDict
 from decouple import config
 from helperfunctions import compileCoords, findFrequency
-from vega_datasets import data
+import plotly.graph_objects as go
 import streamlit as st
 import requests as req
 import altair as alt
@@ -13,7 +13,7 @@ import time
 now = time.time()
 
 # Page Layout
-st.set_page_config(layout="wide", page_title="PokemonGo Helper")
+st.set_page_config(layout="centered", page_title="PokemonGo Helper", initial_sidebar_state="expanded")
 
 # Page Title
 st.title("PokemonGo Helper")
@@ -28,12 +28,9 @@ pokemon_syd_map_url = "https://sydneypogomap.com/pokestop.php?time=%s" % int(now
 headers = {"X-RapidAPI-Key": config("API_KEY")}
 
 # Requests
-pokemon_names_response = req.request("GET", pokemon_names_url, headers=headers)
-pokemon_stats_response = req.request("GET", pokemon_stats_url, headers=headers)
-pokemon_types_response = req.request("GET", pokemon_types_url, headers=headers)
-pokemon_london_map_response = req.request("GET", pokemon_london_map_url)
-pokemon_nyc_map_response = req.request("GET", pokemon_nyc_map_url)
-pokemon_syd_map_response = req.request("GET", pokemon_syd_map_url)
+pokemon_names_response = req.request("GET", pokemon_names_url, headers=headers) # Search
+pokemon_stats_response = req.request("GET", pokemon_stats_url, headers=headers) # Search 
+pokemon_types_response = req.request("GET", pokemon_types_url, headers=headers) # Analysis
 
 # Navigation Bar (Side)
 sidebar_selectbox = st.sidebar.selectbox(
@@ -44,7 +41,7 @@ sidebar_selectbox = st.sidebar.selectbox(
 # Page 1 - Search
 if sidebar_selectbox == "Search":
 
-# Dictionary that maintains order of inserted key-values: pokemon_id: pokemon_name
+# Dictionary that maintains order of inserted key-values: {pokemon_id: pokemon_name}
     ordered_pokemon = OrderedDict()
     for i in range(1, len(pokemon_names_response.json())):
         ordered_pokemon[pokemon_names_response.json()[str(i)]["id"]] = pokemon_names_response.json()[str(i)]["name"]
@@ -55,17 +52,71 @@ if sidebar_selectbox == "Search":
     for i in ordered_pokemon:
         list_of_names.append(ordered_pokemon[i])
 
-# Search Box for pokemon for specific stats
-    st.selectbox(label="pokemon", options=list_of_names)
-
-# Interactive Graph of every pokemon
+# Generate Interactive Graph of every pokemon
     df = pd.DataFrame.from_dict(pokemon_stats_response.json())
     df = df.drop(columns=['form'])
     df = df.drop_duplicates()
     df = df.rename(columns={"pokemon_name":"Name", "pokemon_id": "ID"})
     df.insert(0, 'ID', df.pop('ID'))
     df.insert(0, 'Name', df.pop('Name'))
+
+# Search Box(s) for pokemon to locate specific stats
+
+    poke_one = st.selectbox(label="pokemon1", options=list_of_names)
+    poke_two = st.selectbox(label="pokemon2", options=list_of_names)
+    
+    poke_one_stats = [0,0,0]
+    poke_two_stats = [0,0,0]
+
+    poke_one_row = df.loc[df['Name'] == poke_one]
+    poke_two_row = df.loc[df['Name'] == poke_two]
+
+    # Input DataSet 1
+    poke_one_stats[0] = poke_one_row.iloc[0]['base_stamina']
+    poke_one_stats[1] = poke_one_row.iloc[0]['base_attack']
+    poke_one_stats[2] = poke_one_row.iloc[0]['base_defense']
+    
+    # Input DataSet 2
+    poke_two_stats[0] = poke_two_row.iloc[0]['base_stamina']
+    poke_two_stats[1] = poke_two_row.iloc[0]['base_attack']
+    poke_two_stats[2] = poke_two_row.iloc[0]['base_defense']
+
+    # Radar Chart
+    categories = ['Stamina', 'Attack', 'Defense']
+    fig = go.Figure()
+    
+    # Data set 1
+    fig.add_trace(go.Scatterpolar(
+      r=poke_one_stats, # <-- Data 
+      theta=categories,
+      fill='toself',
+      name='Product A'
+    ))
+
+    # Data set 2
+    fig.add_trace(go.Scatterpolar(
+      r=poke_two_stats, # <-- Data
+      theta=categories,
+      fill='toself',
+      name='Product A'
+    ))
+
+    fig.update_layout(
+        polar=dict(
+        radialaxis=dict(
+        visible=True,
+        range=[0, 500],
+        # NEEDS CHANGE
+        # Change of colors - https://plotly.com/python-api-reference/generated/plotly.graph_objects.Layout.html
+    )),
+    showlegend=False
+    )
+    # Draw Radar Chart
+    st.write(fig)
+
+    # Draw Interactive Graph
     st.dataframe(df)
+
 
 # Page 2 - Analysis
 elif sidebar_selectbox == "Analysis":
@@ -99,11 +150,13 @@ elif sidebar_selectbox == "Analysis":
 
     line_df = pd.DataFrame(line_graph_types)
 
-    # 3 options - check boxes or radio buttons
-    line_chart = (alt.Chart(line_df).mark_line().encode(alt.X('Type'), alt.Y('Stamina')))
-    st.altair_chart(line_chart)
+    stat_option = st.selectbox(
+     'Which Base Stat would you like to view?',
+     ('Stamina', 'Attack', 'Defense'))
 
-# Bar Chart of Types Frequency
+    st.altair_chart(alt.Chart(line_df).mark_line().encode(alt.X('Type'), alt.Y('{}'.format(stat_option)))) 
+
+    # Bar Chart of Types Frequency
     pokemon_type_dist = findFrequency(pokemon_types_response.json())
 
     # Dictionary pokemon_type_dist now holds = {type: freq}
@@ -115,27 +168,60 @@ elif sidebar_selectbox == "Analysis":
         newType["Type"] = val
         newType["Frequency"] = pokemon_type_dist[val]
         bar_chart_data.append(newType)
+        type_df = pd.DataFrame(bar_chart_data)
 
-    type_df = pd.DataFrame(bar_chart_data)
     st.write("Pokemon Type Frequency Distribution")
 
     chart = (alt.Chart(type_df).mark_bar().encode(alt.X("Type"), alt.Y("Frequency"),alt.Color("Type"), alt.Tooltip(["Type", "Frequency"]),).interactive())
     st.altair_chart(chart)
 
+# Page 3 - Locations
 elif sidebar_selectbox == "Locations":
+
+    # Description
     st.write("PokeStops and Gyms of Popular Spoofing locations")
+
+    # Location Dropdown
+    location_option = st.selectbox(
+     'What spoofing location would you like to view?',
+     ('London', 'NYC', 'Sydney'))
+
     # Map chart - LONDON
-    london_df = pd.DataFrame(compileCoords(pokemon_london_map_response.json()))
-    st.map(london_df)
+    if location_option == 'London':
+        # Request
+        pokemon_london_map_response = req.request("GET", pokemon_london_map_url) 
+        if pokemon_london_map_response.status_code == 200:
+            london_df = pd.DataFrame(compileCoords(pokemon_london_map_response.json()))
+            st.map(london_df)
+        else:
+            st.error("API Error: Unable to validate API request at this moment.")
 
     # Map chart - NYC
-    nyc_df = pd.DataFrame(compileCoords(pokemon_nyc_map_response.json()))
-    st.map(nyc_df)
+    elif location_option == 'NYC':
+        # Request
+        pokemon_nyc_map_response = req.request("GET", pokemon_nyc_map_url)
+        if pokemon_nyc_map_response.status_code == 200:
+            nyc_df = pd.DataFrame(compileCoords(pokemon_nyc_map_response.json()))
+            st.map(nyc_df)
+        else:
+            st.error("API Error: Unable to validate API request at this moment.")
 
     # Map Chart - Sydney
-    syd_df = pd.DataFrame(compileCoords(pokemon_syd_map_response.json()))
-    st.map(syd_df)
+    elif location_option == 'Sydney':
+        # Request
+        pokemon_syd_map_response = req.request("GET", pokemon_syd_map_url)
 
+        if pokemon_syd_map_response.status_code == 200:
+            syd_df = pd.DataFrame(compileCoords(pokemon_syd_map_response.json()))
+            st.map(syd_df)
+        else:
+            st.error("API Error: Unable to validate API request at this moment.")
+    
+    # Invalid Location Entry
+    else:
+        st.error("Error: Invalid location option was selected.")
+
+# Page 1 - Home Page        
 else:
     st.write("Home Page")
 
