@@ -1,12 +1,11 @@
 from typing import OrderedDict
 from decouple import config
-from helperfunctions import compileCoords, findFrequency
+from helperfunctions import compileCoords, findFrequency, spreadData
 import plotly.graph_objects as go
 import streamlit as st
 import requests as req
 import altair as alt
 import pandas as pd
-import numpy as np
 import time
 
 # Current Time
@@ -56,7 +55,8 @@ if sidebar_selectbox == "Search":
     df = pd.DataFrame.from_dict(pokemon_stats_response.json())
     df = df.drop(columns=['form'])
     df = df.drop_duplicates()
-    df = df.rename(columns={"pokemon_name":"Name", "pokemon_id": "ID"})
+    df = df.rename(columns={"pokemon_name":"Name", "pokemon_id": "ID", "base_stamina": "Base Stamina",
+    "base_attack": "Base Attack", "base_defense": "Base Defense"})
     df.insert(0, 'ID', df.pop('ID'))
     df.insert(0, 'Name', df.pop('Name'))
 
@@ -68,18 +68,8 @@ if sidebar_selectbox == "Search":
     poke_one_stats = [0,0,0]
     poke_two_stats = [0,0,0]
 
-    poke_one_row = df.loc[df['Name'] == poke_one]
-    poke_two_row = df.loc[df['Name'] == poke_two]
-
-    # Input DataSet 1
-    poke_one_stats[0] = poke_one_row.iloc[0]['base_stamina']
-    poke_one_stats[1] = poke_one_row.iloc[0]['base_attack']
-    poke_one_stats[2] = poke_one_row.iloc[0]['base_defense']
-    
-    # Input DataSet 2
-    poke_two_stats[0] = poke_two_row.iloc[0]['base_stamina']
-    poke_two_stats[1] = poke_two_row.iloc[0]['base_attack']
-    poke_two_stats[2] = poke_two_row.iloc[0]['base_defense']
+    spreadData(poke_one_stats, df, poke_one)
+    spreadData(poke_two_stats, df, poke_two)
 
     # Radar Chart
     categories = ['Stamina', 'Attack', 'Defense']
@@ -105,7 +95,7 @@ if sidebar_selectbox == "Search":
         polar=dict(
         radialaxis=dict(
         visible=True,
-        range=[0, 500],
+        range=[0, max(max(poke_one_stats), max(poke_two_stats))], # <-- Resize based on max of both selections
         # NEEDS CHANGE
         # Change of colors - https://plotly.com/python-api-reference/generated/plotly.graph_objects.Layout.html
     )),
