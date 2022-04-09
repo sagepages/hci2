@@ -87,38 +87,58 @@ if sidebar_selectbox == "Comparisons":
     cols[0].write("Stamina ({}) - Attack ({}) - Defense ({})".format(poke_one_stats[0],poke_one_stats[1],poke_one_stats[2]))
     cols[1].write("Stamina ({}) - Attack ({}) - Defense ({})".format(poke_two_stats[0],poke_two_stats[1],poke_two_stats[2]))
 
-    # Radar Chart
-    categories = ['Stamina', 'Attack', 'Defense']
-    fig = go.Figure()
-    
-    # Data set 1
-    fig.add_trace(go.Scatterpolar(
-      r=poke_one_stats, # <-- Data 
-      theta=categories,
-      fill='toself',
-      name='Product A'
-    ))
+    # Empty Space
+    cols[0].text("")
+    cols[0].text("")
+    cols[0].text("")
+    cols[1].text("")
+    cols[1].text("")
+    cols[1].text("")
 
-    # Data set 2
-    fig.add_trace(go.Scatterpolar(
-      r=poke_two_stats, # <-- Data
-      theta=categories,
-      fill='toself',
-      name='Product A'
-    ))
+    # Empty Space
+    st.text("")
+    st.text("")
 
-    fig.update_layout(
-        polar=dict(
-        radialaxis=dict(
-        visible=True,
-        range=[0, max(max(poke_one_stats), max(poke_two_stats))], # <-- Resize based on max of both selections
-        # NEEDS CHANGE
-        # Change of colors - https://plotly.com/python-api-reference/generated/plotly.graph_objects.Layout.html
-    )),
-    showlegend=False
-    )
     # Draw Radar Chart
     with st.expander("Radar Comparison Chart"):
+
+        exp_cols = st.columns(2)
+
+        colorpick1 = exp_cols[0].color_picker('Option 1 Line Color', '#fa8072')
+        colorpick2 = exp_cols[1].color_picker('Option 2 Line Color', '#ADD8E6')
+
+        # Radar Chart
+        categories = ['Stamina', 'Attack', 'Defense']
+        fig = go.Figure()
+        
+        # Data set 1
+        fig.add_trace(go.Scatterpolar(
+        r=poke_one_stats, # <-- Data 
+        theta=categories,
+        fill='toself',
+        name='Product A',
+        line={'color': colorpick1, 'dash': 'solid'}
+        ))
+
+        # Data set 2
+        fig.add_trace(go.Scatterpolar(
+        r=poke_two_stats, # <-- Data
+        theta=categories,
+        fill='toself',
+        name='Product B',
+        line= {'color': colorpick2, 'dash': 'solid'}
+        ))
+
+        fig.update_layout(
+            polar=dict(
+            radialaxis=dict(
+            visible=True,
+            range=[0, max(max(poke_one_stats), max(poke_two_stats))], # <-- Resize based on max of both selections
+            linecolor="#000000"
+        )),
+        showlegend=False
+        )
+
         st.write(fig)
     
     # Empty Space
