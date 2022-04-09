@@ -1,6 +1,7 @@
 from typing import OrderedDict
 from decouple import config
 from helperfunctions import compileCoords, findFrequency, spreadData, translateGen
+from Pokemon import Pokemon
 import plotly.graph_objects as go
 import streamlit as st
 import requests as req
@@ -34,11 +35,11 @@ pokemon_types_response = req.request("GET", pokemon_types_url, headers=headers) 
 # Navigation Bar (Side)
 sidebar_selectbox = st.sidebar.selectbox(
    "Select:",
-   ["Homepage", "Search", "Analysis","Locations"]
+   ["Homepage", "Comparisons", "Rank", "Analysis","Locations"]
 )
 
-# Page 1 - Search
-if sidebar_selectbox == "Search":
+# Page 1 - Comparisons
+if sidebar_selectbox == "Comparisons":
 
     # Dictionary that maintains order of inserted key-values: {pokemon_id: pokemon_name}
     ordered_pokemon = OrderedDict()
@@ -83,6 +84,9 @@ if sidebar_selectbox == "Search":
     spreadData(poke_one_stats, df, poke_one)
     spreadData(poke_two_stats, df, poke_two)
 
+    cols[0].write("Stamina ({}) - Attack ({}) - Defense ({})".format(poke_one_stats[0],poke_one_stats[1],poke_one_stats[2]))
+    cols[1].write("Stamina ({}) - Attack ({}) - Defense ({})".format(poke_two_stats[0],poke_two_stats[1],poke_two_stats[2]))
+
     # Radar Chart
     categories = ['Stamina', 'Attack', 'Defense']
     fig = go.Figure()
@@ -124,26 +128,99 @@ if sidebar_selectbox == "Search":
     st.text("")
 
     # Select Slider
-    lowerBound, upperBound = st.select_slider('Select a range of pokemon generations you want to view', 
-    options=['Gen 1', 'Gen 2', 'Gen 3', 'Gen 4', 'Gen 5', 'Gen 6', 'Gen 7', 'Gen 8'],
-    value=('Gen 1', 'Gen 8'))
+    lowerBound, upperBound = st.select_slider('Select the generation(s) of pokemon you want to view in the interactive table.', 
+    options=['1', '2', '3', '4', '5', '6', '7', '8'],
+    value=('1', '8'))
 
     # Make chart responsive to bar
     result = translateGen(lowerBound, upperBound)
     df = df[(df['ID'] >= result[0]) & (df['ID'] <= result[1])]
-    
+
+    # Empty Space
+    st.text("")
+    st.text("")
+
     # Draw Interactive Graph
-    st.write("Complete Pokedex of base stats")
+    st.write("Base Stats")
     st.dataframe(df)
 
+# Page 2 - Rank
+elif sidebar_selectbox == "Rank":
 
-# Page 2 - Analysis
+    st.write("Rank")
+
+    # Generate Interactive Graph of every pokemon
+    if pokemon_stats_response.status_code == 200:
+        newdf = pd.DataFrame.from_dict(pokemon_stats_response.json())
+        newdf = newdf.drop(columns=['form'])
+        newdf = newdf.drop_duplicates()
+        newdf = newdf.rename(columns={"pokemon_name":"Pokemon", "pokemon_id": "ID",
+        "base_attack": "Base Attack", "base_defense": "Base Defense", "base_stamina": "Base Stamina"})
+        newdf.insert(0, 'ID', newdf.pop('ID'))
+        newdf.insert(0, 'Pokemon', newdf.pop('Pokemon'))
+    else:
+        st.error("API Error: Unable to validate API request at this moment.")
+
+    # Dictionary that maintains order of inserted key-values: {pokemon_id: pokemon_name}
+    ordered_pokemon = OrderedDict()
+    if pokemon_names_response.status_code == 200:
+        for i in range(1, len(pokemon_names_response.json())):
+            ordered_pokemon[pokemon_names_response.json()[str(i)]["id"]] = pokemon_names_response.json()[str(i)]["name"]
+    else:
+        st.error("API Error: Unable to validate API request at this moment.")
+
+    # List of pokemon names for select box
+    list_of_pokes = []
+    for i in ordered_pokemon:
+        list_of_pokes.append(ordered_pokemon[i])
+    
+    poke_choice = st.selectbox(label="Pokemon Name" ,options=list_of_pokes)
+
+    input_cols = st.columns(3)
+    val2 = input_cols[1].number_input(label="Attack",min_value=0,max_value=15)
+    val3 = input_cols[2].number_input(label="Defense",min_value=0,max_value=15)
+    val1 = input_cols[0].number_input(label="Stamina",min_value=0,max_value=15)
+
+    poke = Pokemon(poke_choice, val2, val3, val1, newdf)
+
+    poke.get_selected_info()
+    poke.find_nearest_level_great()
+    poke.find_nearest_cpm()
+    poke.find_statproduct()
+    poke.sortby_statproduct()
+    poke.find_user_choice_rank()
+
+    poke_dict = {
+        "Pokemon": [poke.name], 
+        "Attack":[int(poke.attack)], 
+        "Defense":[int(poke.defense)],
+        "Stamina":[int(poke.stamina)],  
+        "Optimal Level":[round(poke.level)], 
+        "Rank": [poke.rank], 
+        "CP":[poke.CP]
+    }
+
+    result_df = pd.DataFrame(poke_dict)
+
+    st.text("")
+    st.text("")
+    st.text("")
+
+    st.write(result_df)
+
+# Page 3 - Analysis
 elif sidebar_selectbox == "Analysis":
 
     # Information Box
 
     st.info("Wait times for checkbox options on average are longer than other components.")
 
+    # Empty space
+    st.text("")
+    st.text("")
+    st.text("")
+
+    st.write("Select a box to view the stat distribution among pokemon types.")
     # Line Chart of trend of stats
     line_graph_data = dict()
     for i in range(len(pokemon_types_response.json())):
@@ -210,14 +287,14 @@ elif sidebar_selectbox == "Analysis":
     with st.expander("Pokemon Type Frequency"):
         st.altair_chart(chart)
 
-# Page 3 - Locations
+# Page 4 - Locations
 elif sidebar_selectbox == "Locations":
 
     # Description
     st.write("PokeStops and Gyms of Popular Spoofing locations")
 
     # Location Dropdown
-    location_option = st.selectbox(
+    location_option = st.radio(
      'What spoofing location would you like to view?',
      ('London', 'NYC', 'Sydney'))
 
@@ -267,6 +344,7 @@ elif sidebar_selectbox == "Locations":
 # Page 1 - Home Page        
 else:
     st.write("Home Page")
+    st.write("!!!!! Descriptions needed for each page and introduction to site !!!!")
     
 
 

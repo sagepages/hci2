@@ -2,3 +2,4 @@ streamlit
 pandas
 python-decouple
 plotly==5.7.0
+openpyxl
