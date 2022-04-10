@@ -363,8 +363,32 @@ elif sidebar_selectbox == "Locations":
 
 # Page 1 - Home Page        
 else:
-    st.write("Home Page")
-    st.write("!!!!! Descriptions needed for each page and introduction to site !!!!")
+    intro_p1 = """## If you want access to an in-depth description of what this site has to offer,\n ## Accept the terms and conditions down below.\n ## Otherwise, your just going in ***blind***, bro."""
+    
+    intro = st.empty()
+    intro.markdown(intro_p1)
+    placeholder = st.empty()
+    cols = placeholder.columns(1)
+    terms = cols[0].button("Accept Terms & Conditions")
+    if terms:
+        intro.empty()
+        placeholder.empty()
+        st.success("Psst, come on in. The gangs all here...")
+        st.markdown("## Welcome to PokemonGo Helper")
+        st.markdown("#### Heres a quick breakdown of what each page has to offer")
+        st.markdown("### Comparisons")
+        st.markdown("##### Head to this page to compare *two* different Pokemons stats on an awesome looking radar chart that you can style to your liking and view all 900 pokemon on an interactive table.")
+        st.markdown("### Rank")
+        st.markdown("##### A quick way to find out which rank your pokemon is out of the ***4096*** permutations.")
+        st.markdown("### Analysis")
+        st.markdown("##### *Fancy* charts for *fancy* people that like *fancy* statistics.")
+        st.markdown("### Locations")
+        st.markdown("##### We all know that everyone cheats at Pokemon Go, I mean who has time to go outside anymore? He are some of the most popular spoofing locations we could find.")
+
+
+            
+
+    
     
 
 
