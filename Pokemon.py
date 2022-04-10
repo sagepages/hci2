@@ -1,13 +1,15 @@
 import pandas as pd
 import numpy as np
+import os
 
 GREAT_LEAGUE = 15009.9
 ULTRA_LEAGUE = 25009.9
 
 pd.set_option('display.float_format', lambda x: '%.3f' % x)
 
-iv_combinations = pd.read_excel('excel/ivPer.xlsx')
-cp_multiplier = pd.read_excel('excel/Multiplier.xlsx')
+
+iv_combinations = pd.read_excel("excel/ivPer.xlsx")
+cp_multiplier = pd.read_excel('excel/multiplier.xlsx')
 
 iv_combinations.columns = ['Attack', 'Defense', 'Stamina']
 
