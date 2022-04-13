@@ -167,8 +167,6 @@ if sidebar_selectbox == "Comparisons":
 # Page 2 - Rank
 elif sidebar_selectbox == "Rank":
 
-    st.write("Rank")
-
     # Generate Interactive Graph of every pokemon
     if pokemon_stats_response.status_code == 200:
         newdf = pd.DataFrame.from_dict(pokemon_stats_response.json())
@@ -311,11 +309,11 @@ elif sidebar_selectbox == "Analysis":
 elif sidebar_selectbox == "Locations":
 
     # Description
-    st.write("PokeStops and Gyms of Popular Spoofing locations")
+    st.markdown("### PokeStops and Gyms of Popular Spoofing locations")
 
     # Location Dropdown
     location_option = st.radio(
-     'What spoofing location would you like to view?',
+     'Which spoofing location would you like to view?',
      ('London', 'NYC', 'Sydney'))
 
     # Map chart - LONDON
@@ -327,7 +325,7 @@ elif sidebar_selectbox == "Locations":
                 london_df = pd.DataFrame(compileCoords(pokemon_london_map_response.json()))
                 st.map(london_df)
             except:
-                st.error("Error: API returned an [] of empty coordinates. Try again at a later time.")
+                st.error("Error: API is currently returning an array of empty coordinates. Try again at a later time.")
         else:
             st.error("API Error: Unable to validate API request at this moment.")
 
@@ -340,7 +338,7 @@ elif sidebar_selectbox == "Locations":
                 nyc_df = pd.DataFrame(compileCoords(pokemon_nyc_map_response.json()))
                 st.map(nyc_df)
             except:
-                st.error("Error: API returned an [] of empty coordinates. Try again at a later time.")
+                st.error("Error: API is currently returning an array of empty coordinates. Try again at a later time.")
         else:
             st.error("API Error: Unable to validate API request at this moment.")
 
@@ -353,7 +351,7 @@ elif sidebar_selectbox == "Locations":
                 syd_df = pd.DataFrame(compileCoords(pokemon_syd_map_response.json()))
                 st.map(syd_df)
             except:
-                st.error("Error: API returned an [] of empty coordinates. Try again at a later time.")
+                st.error("Error: API is currently returning an array of empty coordinates. Try again at a later time.")
         else:
             st.error("API Error: Unable to validate API request at this moment.")
     
@@ -363,7 +361,7 @@ elif sidebar_selectbox == "Locations":
 
 # Page 1 - Home Page        
 else:
-    intro_p1 = """## If you want access to an in-depth description of what this site has to offer,\n ## Accept the terms and conditions down below.\n ## Otherwise, your just going in ***blind***, bro."""
+    intro_p1 = """## If you want access to an in-depth description of what this site has to offer - \n ## Accept the terms and conditions below.\n ## Otherwise, you're just going in ***blind***, bro."""
     
     intro = st.empty()
     intro.markdown(intro_p1)
@@ -375,15 +373,15 @@ else:
         placeholder.empty()
         st.success("Psst, come on in. The gangs all here...")
         st.markdown("## Welcome to PokemonGo Helper")
-        st.markdown("#### Heres a quick breakdown of what each page has to offer")
+        st.markdown("#### Heres a quick breakdown of what each page has to offer.")
         st.markdown("### Comparisons")
-        st.markdown("##### Head to this page to compare *two* different Pokemons stats on an awesome looking radar chart that you can style to your liking and view all 900 pokemon on an interactive table.")
+        st.markdown("##### Head to this page to compare *two* different Pokemons stats on an awesome radar chart that you can style to your liking and view all nine hundred pokemon on an interactive table.")
         st.markdown("### Rank")
-        st.markdown("##### A quick way to find out which rank your pokemon is out of the ***4096*** permutations.")
+        st.markdown("##### A quick way to find out what rank your pokemon is out of the ***4096*** possible permutations.")
         st.markdown("### Analysis")
-        st.markdown("##### *Fancy* charts for *fancy* people that like *fancy* statistics.")
+        st.markdown("##### *Fancy* charts, for *fancy* people, that like *fancy* statistics.")
         st.markdown("### Locations")
-        st.markdown("##### We all know that everyone cheats at Pokemon Go, I mean who has time to go outside anymore? He are some of the most popular spoofing locations we could find.")
+        st.markdown("##### We all know that everyone cheats at Pokemon Go, I mean who has time to go outside anymore? Here are some of the most popular spoofing locations we could find.")
 
 
             
