@@ -383,7 +383,7 @@ else:
         st.markdown("### Analysis")
         st.markdown("##### *Fancy* charts for *fancy* people that like *fancy* statistics.")
         st.markdown("### Locations")
-        st.markdown("##### We all know that everyone cheats at Pokemon Go, I mean who has time to go outside anymore? He are some of the most popular spoofing locations we could find.")
+        st.markdown("##### We all know that everyone cheats at Pokemon Go, I mean who has time to go outside anymore? Here are some of the most popular spoofing locations we could find.")
 
 
             

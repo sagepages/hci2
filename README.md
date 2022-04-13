@@ -10,6 +10,7 @@
 - Run ``` pip install --upgrade pip ```
 - [Optional step] Create a virtual enviornment ``` virtualenv venv ``` and load it into workspace.
 - Then, Run ``` pip install -r requirements.txt ``` to install the project dependencies.
+- Create ` .env ` file with value `API_KEY=<your_api_key>` (get key from [RapidAPI](https://rapidapi.com/))
 - Finally, ``` streamlit run main.py ```
 
 #### Contributors
