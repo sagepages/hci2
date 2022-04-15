@@ -373,15 +373,15 @@ else:
         placeholder.empty()
         st.success("Psst, come on in. The gangs all here...")
         st.markdown("## Welcome to PokemonGo Helper")
-        st.markdown("#### Heres a quick breakdown of what each page has to offer.")
+        st.markdown("#### Heres a quick breakdown of what each page has to offer. Use the side bar to navigate them.")
         st.markdown("### Comparisons")
-        st.markdown("##### Head to this page to compare *two* different Pokemons stats on an awesome radar chart that you can style to your liking and view all nine hundred pokemon on an interactive table.")
+        st.markdown("##### Head to this page to compare *two* different Pokemons stats on an awesome radar chart that you can style to your liking and as well as an interactive table to view all nine hundred pokemon.")
         st.markdown("### Rank")
         st.markdown("##### A quick way to find out what rank your pokemon is out of the ***4096*** possible permutations.")
         st.markdown("### Analysis")
         st.markdown("##### *Fancy* charts, for *fancy* people, that like *fancy* statistics.")
         st.markdown("### Locations")
-        st.markdown("##### We all know that everyone cheats at Pokemon Go, I mean who has time to go outside anymore? Here are some of the most popular spoofing locations we could find.")
+        st.markdown("##### We all know that everyone cheats at Pokemon Go. I mean, who has time to go outside anymore? Here are some of the most popular spoofing locations we could find.")
 
 
             
